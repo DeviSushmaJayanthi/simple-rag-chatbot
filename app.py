@@ -15,19 +15,28 @@ import streamlit as st
 load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
+if not GOOGLE_API_KEY:
+    st.sidebar.warning("API Key notfound in environment")
+    user_key = st.sidebar.text_input("Enter your Google API Key",type = "password")
+    selected_api_key = user_key
+else:
+    st.sidebar.success("API key loaded from .env")
+    selected_api_key = GOOGLE_API_KEY
+
+
 # Define Paths
-DATA_PATH = os.getenv("DATA_PATH")
-DB_FAISS_PATH = os.getenv("DB_FAISS_PATH")
+DATA_PATH = "F:/Sushma_Learning/Gen AI/Similarity Search/data"
+DB_FAISS_PATH = "vectorstore/db_faiss"
 
 # 2. INITIALIZE MODELS (Using 2026 Stable Models)
 embeddings = GoogleGenerativeAIEmbeddings(
     model="models/gemini-embedding-001", 
-    google_api_key=GOOGLE_API_KEY
+    google_api_key=selected_api_key
 )
 
 llm = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",
-    google_api_key=GOOGLE_API_KEY,
+    google_api_key=selected_api_key,
     temperature=0.2  # Keep it factual and concise
 )
 
@@ -65,7 +74,7 @@ def get_rag_response(user_input):
     )
     
     prompt = ChatPromptTemplate.from_messages([
-        ("system", system_prompt),
+        ("system", system_prompt), 
         ("human", "{input}"),
     ])
 
@@ -89,11 +98,15 @@ if __name__ == "__main__":
     
     # Get the complete response dictionary
     if st.button("Get Response"):
-        result = get_rag_response(query)
-        st.success(result["answer"])
+        if not selected_api_key:
+            st.error("please provide the google api key to proceed further")
+        else:
 
-        # Output which files it looked at
-        st.write("SOURCES")
-        sources = {os.path.basename(doc.metadata['source']) for doc in result["context"]}
-        for source in sources:
-            st.write(f"- {source}")
+            result = get_rag_response(query)
+            st.success(result["answer"])
+
+            # Output which files it looked at
+            st.write("SOURCES")
+            sources = {os.path.basename(doc.metadata['source']) for doc in result["context"]}
+            for source in sources:
+                st.write(f"- {source}")
