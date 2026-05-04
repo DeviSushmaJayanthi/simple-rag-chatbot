@@ -25,7 +25,7 @@ else:
 
 
 # Define Paths
-DATA_PATH = "F:/Sushma_Learning/Gen AI/Similarity Search/data"
+DATA_PATH = "data"
 DB_FAISS_PATH = "vectorstore/db_faiss"
 
 # 2. INITIALIZE MODELS (Using 2026 Stable Models)
